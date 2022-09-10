@@ -1,0 +1,8 @@
+name = "ToolipsSVG"
+uuid = "8ae86ec9-919d-4ece-9a6d-09b7d28dae11"
+authors = ["emmac <emmettgb@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Toolips = "a47e2ad8-fcf7-417c-9746-32b9bdf220bd"
+ToolipsSession = "2fe55384-55bc-4df3-9d59-c817d405cd05"
