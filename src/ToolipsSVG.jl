@@ -1,9 +1,10 @@
 module ToolipsSVG
 using Toolips
 using ToolipsSession
-import Toolips: AbstractComponent
+import Toolips: AbstractComponent, Servable, write!
 import ToolipsSession: on
-
-greet() = print("Hello World!")
-
+import Base: getindex, setindex!, length, size
+include("SVComponents.jl")
+include("SVActions.jl")
+export circle
 end # module
