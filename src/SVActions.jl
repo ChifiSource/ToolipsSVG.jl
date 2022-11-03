@@ -4,11 +4,16 @@ grow!(cm::ComponentModifier, c::Component{:circle}, percent::String) = begin
     # this is mainly just a placeholder for this file !
     cm[c] = "r" => percent
 end
-moveto!(path::Component{:path}, x::Int64, y::Int64) = path[:d] = path.d * "M$x $y "
 
-lineto!(path::Component{:path}, x::Int64, y::Int64) = path[:d] = path.d * "L$x $y "
+moveto!(path::Component{:path}, x::Int64, y::Int64) = begin
+    path["d"] = path["d"] * "M$x $y "
+end
 
-closepath!(path::Component{:path}) = path[:d] =path[:d] * "Z"
+lineto!(path::Component{:path}, x::Int64, y::Int64) = begin
+     path["d"] = path["d"] * "L$x $y "
+end
+
+closepath!(path::Component{:path}) = path["d"] = path["d"] * "Z"
 
 
 function curveto_q!(path::Component{:path}, x::Int64, a1::Int64, a2::Int64, y::Int64)
