@@ -33,5 +33,5 @@ end
 include("SVComponents.jl")
 include("SVActions.jl")
 export circle, path
-export grow!, moveto!, lineto!, closepath!
+export M!, L!, Z!, Q!
 end # module
