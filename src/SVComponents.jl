@@ -2,6 +2,10 @@ function circle(name::String, p::Pair{String, <:Any} ...; args ...)
     Component(name, "circle", p ..., args ...)::Component{:circle}
 end
 
+function rect(name::String, p::Pair{String, <:Any} ...; args ...)
+    Component(name, "rect", p..., args...)::Component{:rect}
+end
+
 function path(name::String, p::Pair{String, <:Any} ...; d = "", args ...)
     comp = Component(name, "path", p ..., args ...)::Component{:path}
     comp["d"] = d
