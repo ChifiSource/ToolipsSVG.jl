@@ -1,10 +1,16 @@
+"""
+Created in February, 2023 by
+[chifi - an open source software dynasty.](https://github.com/orgs/ChifiSource)
+by team
+[toolips](https://github.com/orgs/ChifiSource/teams/toolips)
+This software is MIT-licensed.
+### ToolipsSVG
+This module brings an array of different Components, as well as making things
+work more thoroughly with paths.
+"""
 module ToolipsSVG
 using Toolips
-using ToolipsSession
 import Toolips: AbstractComponent, Servable, write!, AbstractConnection
-import ToolipsSession: on
-import Base: getindex, setindex!, length, size
-
 function write!(c::AbstractConnection, svp::Component{:path})
     open_tag::String = "<$(svp.tag) id=$(svp.name)"
     text::String = ""
