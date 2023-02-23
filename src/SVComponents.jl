@@ -1,8 +1,9 @@
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### g(name::String, styles::Pair{String, String} ...; args ...) -> ::Component{:g}
 ------------------
-Copies properties from s,properties into c.properties.
+Creates a `g` Component. Note that `styles` replaces the properties argumeent
+for this method.
 #### example
 ```
 
@@ -14,6 +15,38 @@ g(name::String, styles::Pair{String, String} ...; args ...) = begin
         style!(comp, styles ...)
     end
     comp::Component{:g}
+end
+
+"""
+**ToolipsSVG**
+### text(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:text}
+------------------
+Creates a `text` Component.
+#### example
+```
+
+```
+"""
+function text(name::String, p::Pair{String, <:Any} ...; args ...)
+    Component(name, "text", p ..., args ...)
+end
+
+"""
+**ToolipsSVG**
+### animate(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:animate}
+------------------
+Creates an `animate` Component.
+#### example
+```
+
+```
+"""
+function animate(name::String, p::Pair{String, <:Any} ...; args ...)
+    Component(name, "animate", p ..., args ...)
+end
+
+function image(name::String, p::Pair{String, <:Any} ...)
+    Component(name, "image", p ..., args ...)
 end
 
 """
