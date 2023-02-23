@@ -127,12 +127,6 @@ git-tree-sha1 = "827aa7260f159d84754e0680954ec9cba9608a1f"
 uuid = "a47e2ad8-fcf7-417c-9746-32b9bdf220bd"
 version = "0.2.1"
 
-[[deps.ToolipsSession]]
-deps = ["Dates", "Random", "Toolips"]
-git-tree-sha1 = "6e8bb5136b43a1d8dcd3b7a1fff5b910d7ed4c6d"
-uuid = "2fe55384-55bc-4df3-9d59-c817d405cd05"
-version = "0.2.0"
-
 [[deps.URIs]]
 git-tree-sha1 = "e59ecc5a41b000fa94423a578d29290c7266fc10"
 uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
