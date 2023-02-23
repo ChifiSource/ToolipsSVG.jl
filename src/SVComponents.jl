@@ -26,10 +26,8 @@ Copies properties from s,properties into c.properties.
 
 ```
 """
-function circle(name::String, p::Pair{String, <:Any} ...; cx::Any = 0,
-    cy::Any = 0, r::Any = 0, args ...)
-    Component(name, "circle", p ..., cx = cx, cy = cy, r = r,
-    args ...)::Component{:circle}
+function circle(name::String, p::Pair{String, <:Any} ...; args ...)
+    Component(name, "circle", p ..., args ...)::Component{:circle}
 end
 
 """
