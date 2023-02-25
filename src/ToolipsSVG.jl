@@ -11,6 +11,7 @@ work more thoroughly with paths.
 module ToolipsSVG
 using Toolips
 import Toolips: AbstractComponent, Servable, write!, AbstractConnection
+
 function write!(c::AbstractConnection, svp::Component{:path})
     open_tag::String = "<$(svp.tag) id=$(svp.name)"
     text::String = ""
@@ -36,16 +37,66 @@ function write!(c::AbstractConnection, svp::Component{:path})
    write!(c, svp.extras)
 end
 
+"""
+**ToolipsSVG**
+### M!(path::Component{:path}, x::Number, y::Number)
+------------------
+Moves `path` cursor to `x`, `y`.
+#### example
+```
+
+```
+"""
 M!(path::Component{:path}, x::Number, y::Number) = path["d"] = path["d"] * "M$x $y "
 
+"""
+**ToolipsSVG**
+### M!(path::Component{:path}, x::Number, y::Number)
+------------------
+Draws line to `x`, `y` on `path`.
+#### example
+```
+
+```
+"""
 L!(path::Component{:path}, x::Number, y::Number) = path["d"] = path["d"] * "L$x $y "
 
-Z!(path::Component{:path}, x::Number, y::Number) = path["d"] = path["d"] * "Z"
+"""
+**ToolipsSVG**
+### Z!(path::Component{:path})
+------------------
+Closes `path` line.
+#### example
+```
 
+```
+"""
+Z!(path::Component{:path}) = path["d"] = path["d"] * "Z"
+
+"""
+**ToolipsSVG**
+### Q!(path::Component{:path}, x::Number, a1::Number, a2::Number, y::Number)
+------------------
+Draws curve on `path`.
+#### example
+```
+
+```
+"""
 function Q!(path::Component{:path}, x::Number, a1::Number, a2::Number, y::Number)
     path[:d] = path[:d] * "Q$x, $a1 $a2, $y "
 end
 
+"""
+**ToolipsSVG**
+### C!(path::Component{:path}, x::Number, a1::Number, a2::Number, y::Number)
+------------------
+Draws curve on `path`.
+#### example
+```
+
+```
+"""
 function C!(x::Number, y::Number, a1::Number, a2::Number, a4::Number)
     path[:d] = path[:d] * "C$x,$y $a1, $a2 $a3, $a4 "
 end

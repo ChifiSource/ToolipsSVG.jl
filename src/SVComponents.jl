@@ -1,8 +1,9 @@
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### g(name::String, styles::Pair{String, String} ...; args ...) -> ::Component{:g}
 ------------------
-Copies properties from s,properties into c.properties.
+Creates a `g` Component. Note that `styles` replaces the properties argumeent
+for this method.
 #### example
 ```
 
@@ -17,26 +18,66 @@ g(name::String, styles::Pair{String, String} ...; args ...) = begin
 end
 
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### text(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:text}
 ------------------
-Copies properties from s,properties into c.properties.
+Creates a `text` Component.
 #### example
 ```
 
 ```
 """
-function circle(name::String, p::Pair{String, <:Any} ...; cx::Number = 0,
-    cy::Number = 0, r::Number = 0, args ...)
-    Component(name, "circle", p ..., cx = cx, cy = cy, r = r,
-    args ...)::Component{:circle}
+function text(name::String, p::Pair{String, <:Any} ...; args ...)
+    Component(name, "text", p ..., args ...)
 end
 
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### animate(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:animate}
 ------------------
-Copies properties from s,properties into c.properties.
+Creates an `animate` Component.
+#### example
+```
+
+```
+"""
+function animate(name::String, p::Pair{String, <:Any} ...; args ...)
+    Component(name, "animate", p ..., args ...)
+end
+
+"""
+**ToolipsSVG**
+### image(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:image}
+------------------
+Creates an `image` Component.
+#### example
+```
+
+```
+"""
+function image(name::String, p::Pair{String, <:Any} ...)
+    Component(name, "image", p ..., args ...)
+end
+
+"""
+**ToolipsSVG**
+### circle(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:circle}
+------------------
+Creates an `circle` Component.
+#### example
+```
+
+```
+"""
+function circle(name::String, p::Pair{String, <:Any} ...; args ...)
+    Component(name, "circle", p ..., args ...)::Component{:circle}
+end
+
+"""
+**ToolipsSVG**
+### rect(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:rect}
+------------------
+Creates an `rect` Component.
 #### example
 ```
 
@@ -47,10 +88,10 @@ function rect(name::String, p::Pair{String, <:Any} ...; args ...)
 end
 
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### path(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:path}
 ------------------
-Copies properties from s,properties into c.properties.
+Creates a `path` Component.
 #### example
 ```
 
@@ -63,10 +104,10 @@ function path(name::String, p::Pair{String, <:Any} ...; d = "", args ...)
 end
 
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### line(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:line}
 ------------------
-Copies properties from s,properties into c.properties.
+Creates a `line` Component.
 #### example
 ```
 
@@ -77,24 +118,10 @@ function line(name::String, p::Pair{String, <:Any} ...; args ...)
 end
 
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### ellipse(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:ellipse}
 ------------------
-Copies properties from s,properties into c.properties.
-#### example
-```
-
-```
-"""
-function image(name::String, p::Pair{String, <:Any} ...; args ...)
-    Component(name, "image", p ..., args ...)
-end
-
-"""
-**Interface**
-### properties!(::Servable, ::Servable) -> _
-------------------
-Copies properties from s,properties into c.properties.
+Creates an `ellipse` Component.
 #### example
 ```
 
@@ -105,10 +132,10 @@ function ellipse(name::String, p::Pair{String, <:Any} ...; args ...)
 end
 
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### polyline(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:polyline}
 ------------------
-Copies properties from s,properties into c.properties.
+Creates a `polyline` Component.
 #### example
 ```
 
@@ -119,10 +146,10 @@ function polyline(name::String, p::Pair{String, <:Any} ...; args ...)
 end
 
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### polygon(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:polygon}
 ------------------
-Copies properties from s,properties into c.properties.
+Creates a `polygon` Component.
 #### example
 ```
 
@@ -133,10 +160,10 @@ function polygon(name::String, p::Pair{String, <:Any} ...; args ...)
 end
 
 """
-**Interface**
-### properties!(::Servable, ::Servable) -> _
+**ToolipsSVG**
+### use(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:use}
 ------------------
-Copies properties from s,properties into c.properties.
+Creates a `use` Component.
 #### example
 ```
 
@@ -144,18 +171,4 @@ Copies properties from s,properties into c.properties.
 """
 function use(name::String, p::Pair{String, <:Any} ...; args ...)
     Component(name, "use", p ..., args ...)
-end
-
-"""
-**Interface**
-### properties!(::Servable, ::Servable) -> _
-------------------
-Copies properties from s,properties into c.properties.
-#### example
-```
-
-```
-"""
-function text(name::String, p::Pair{String, <:Any} ...; args ...)
-    Component(name, "text", p ..., args ...)
 end
