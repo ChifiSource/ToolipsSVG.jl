@@ -105,6 +105,24 @@ end
 
 """
 **ToolipsSVG**
+### path(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:path}
+------------------
+Creates a `path` Component.
+#### example
+```
+
+```
+"""
+function path(f::Function, name::String, p::Pair{String, <:Any} ...; args ...)
+    comp = Component(name, "path", p ..., args ...)::Component{:path}
+    comp["d"] = ""
+    f(comp)
+    comp::Component{:path}
+end
+
+
+"""
+**ToolipsSVG**
 ### line(name::String, p::Pair{String, String} ...; args ...) -> ::Component{:line}
 ------------------
 Creates a `line` Component.
@@ -172,3 +190,17 @@ Creates a `use` Component.
 function use(name::String, p::Pair{String, <:Any} ...; args ...)
     Component(name, "use", p ..., args ...)
 end
+
+
+
+size(comp::Component{<:Any}) = (comp[:width], comp[:height])
+
+coords(comp::Component{<:Any}) = (comp[:x], comp[:y])
+
+size(comp::Component{:circle}) = (comp[:r], comp[:r])
+
+coords(comp::Component{:circle}) = (comp[:cx] + com[:r], comp[:cy] + com[:r])
+
+size(comp::Component{:rect}) = (comp[:width], comp[:height])
+
+coords(comp::Component{:rect}) = (comp[:x], comp[:y])

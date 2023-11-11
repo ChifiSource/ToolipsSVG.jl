@@ -10,6 +10,7 @@ work more thoroughly with paths.
 """
 module ToolipsSVG
 using Toolips
+import Base: size
 import Toolips: AbstractComponent, Servable, write!, AbstractConnection
 
 function write!(c::AbstractConnection, svp::Component{:path})
