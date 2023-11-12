@@ -203,7 +203,7 @@ size(mycircle)
 (2, 2)
 ```
 """
-size(comp::Component{<:Any}) = (comp[:width], comp[:height])
+size(comp::AbstractComponent) = (comp[:width], comp[:height])
 
 """
 **ToolipsSVG**
@@ -217,9 +217,11 @@ position(mycircle)
 (5, 5)
 ```
 """
-position(comp::Component{<:Any}) = (comp[:x], comp[:y])
+position(comp::AbstractComponent) = (comp[:x], comp[:y])
 
-size(comp::Component{:circle}) = (comp[:r], comp[:r])
+function size(comp::Component{:circle})
+    (comp[:r], comp[:r])
+end
 
 position(comp::Component{:circle}) = (comp[:cx] + com[:r], comp[:cy] + com[:r])
 
