@@ -191,8 +191,6 @@ function use(name::String, p::Pair{String, <:Any} ...; args ...)
     Component(name, "use", p ..., args ...)
 end
 
-
-
 size(comp::Component{<:Any}) = (comp[:width], comp[:height])
 
 coords(comp::Component{<:Any}) = (comp[:x], comp[:y])
@@ -204,3 +202,15 @@ coords(comp::Component{:circle}) = (comp[:cx] + com[:r], comp[:cy] + com[:r])
 size(comp::Component{:rect}) = (comp[:width], comp[:height])
 
 coords(comp::Component{:rect}) = (comp[:x], comp[:y])
+
+set_size!(comp::Component{<:Any}, w::Int64, h::Int64) = comp[:width], comp[:height] = w, h
+
+set_size!(comp::Component{:circle}, w::Int64, h::Int64) = comp[:r] = width
+
+set_position!(comp::Component{<:Any}) = comp[:x], comp[:y] = x, y
+
+set_position!(comp::Component{:circle}) = comp[:cx], comp[:cy] = x, y
+
+set_position!(comp::Component{:path}) = begin
+
+end
