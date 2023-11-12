@@ -191,22 +191,68 @@ function use(name::String, p::Pair{String, <:Any} ...; args ...)
     Component(name, "use", p ..., args ...)
 end
 
+"""
+**ToolipsSVG**
+### size(comp::Component{<:Any}) -> Tuple{Int64, Int64}
+------------------
+Used to get consistent size from components no matter the arguments.
+#### example
+```
+mycircle = circle("hello", cx = 5, cy = 5, r = 2)
+size(mycircle)
+(2, 2)
+```
+"""
 size(comp::Component{<:Any}) = (comp[:width], comp[:height])
 
-coords(comp::Component{<:Any}) = (comp[:x], comp[:y])
+"""
+**ToolipsSVG**
+### position(comp::Component{<:Any}) -> Tuple{Int64, Int64}
+------------------
+Used to get consistent position from components no matter the arguments.
+#### example
+```
+mycircle = circle("hello", cx = 5, cy = 5, r = 2)
+position(mycircle)
+(5, 5)
+```
+"""
+position(comp::Component{<:Any}) = (comp[:x], comp[:y])
 
 size(comp::Component{:circle}) = (comp[:r], comp[:r])
 
-coords(comp::Component{:circle}) = (comp[:cx] + com[:r], comp[:cy] + com[:r])
+position(comp::Component{:circle}) = (comp[:cx] + com[:r], comp[:cy] + com[:r])
 
 size(comp::Component{:rect}) = (comp[:width], comp[:height])
 
 coords(comp::Component{:rect}) = (comp[:x], comp[:y])
 
+"""
+**ToolipsSVG**
+### set_size!(comp::Component{<:Any}, w::Int64, h::Int64) -> ::Nothing
+------------------
+Sets the size of a `Component`.
+#### example
+```
+mycircle = circle("hello", cx = 5, cy = 5, r = 2)
+set_size!(mycircle, 6, 6)
+```
+"""
 set_size!(comp::Component{<:Any}, w::Int64, h::Int64) = comp[:width], comp[:height] = w, h
 
 set_size!(comp::Component{:circle}, w::Int64, h::Int64) = comp[:r] = width
 
+"""
+**ToolipsSVG**
+### set_posiiton!(comp::Component{<:Any}, w::Int64, h::Int64) -> ::Nothing
+------------------
+Sets the position of a `Component`.
+#### example
+```
+mycircle = circle("hello", cx = 5, cy = 5, r = 2)
+set_position!(mycircle, 6, 6)
+```
+"""
 set_position!(comp::Component{<:Any}) = comp[:x], comp[:y] = x, y
 
 set_position!(comp::Component{:circle}) = comp[:cx], comp[:cy] = x, y
