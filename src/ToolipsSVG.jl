@@ -39,70 +39,66 @@ function write!(c::AbstractConnection, svp::Component{:path})
 end
 
 """
-**ToolipsSVG**
-### M!(path::Component{:path}, x::Number, y::Number)
-------------------
-Moves `path` cursor to `x`, `y`.
-#### example
-```
 
-```
 """
 M!(path::Component{:path}, x::Number, y::Number) = path["d"] = path["d"] * "M$x $y "
 
 """
-**ToolipsSVG**
-### M!(path::Component{:path}, x::Number, y::Number)
-------------------
-Draws line to `x`, `y` on `path`.
-#### example
-```
 
-```
 """
 L!(path::Component{:path}, x::Number, y::Number) = path["d"] = path["d"] * "L$x $y "
 
 """
-**ToolipsSVG**
-### Z!(path::Component{:path})
-------------------
-Closes `path` line.
-#### example
-```
 
-```
 """
 Z!(path::Component{:path}) = path["d"] = path["d"] * "Z"
 
 """
-**ToolipsSVG**
-### Q!(path::Component{:path}, x::Number, a1::Number, a2::Number, y::Number)
-------------------
-Draws curve on `path`.
-#### example
-```
 
-```
 """
 function Q!(path::Component{:path}, x::Number, a1::Number, a2::Number, y::Number)
     path[:d] = path[:d] * "Q$x, $a1 $a2, $y "
 end
 
 """
-**ToolipsSVG**
-### C!(path::Component{:path}, x::Number, a1::Number, a2::Number, y::Number)
-------------------
-Draws curve on `path`.
-#### example
-```
 
-```
 """
 function C!(x::Number, y::Number, a1::Number, a2::Number, a4::Number)
     path[:d] = path[:d] * "C$x,$y $a1, $a2 $a3, $a4 "
 end
 
-include("SVComponents.jl")
+size(comp::Component{<:Any}) = (comp[:width], comp[:height])
+size(comp::Component{:rect}) = (comp[:width], comp[:height])
+size(comp::Component{:circle}) = (comp[:r], comp[:r])
+
+position(comp::Component{<:Any}) = (comp[:x], comp[:y])
+position(comp::Component{:circle}) = (comp[:cx] + comp[:r], comp[:cy] + comp[:r])
+
+set_size!(comp::Component{<:Any}, w::Int64, h::Int64) = comp[:width], comp[:height] = w, h
+set_size!(comp::Component{:circle}, w::Int64, h::Int64) = comp[:r] = width
+
+set_position!(comp::Component{<:Any}, x::Number, y::Number) = comp[:x], comp[:y] = x, y
+
+set_position!(comp::Component{:circle}, x::Number, y::Number) = comp[:cx], comp[:cy] = x, y
+
+g(name::String, styles::Pair{String, String} ...; args ...) = begin
+    comp::Component{:g} = Component(name, "g", args ...)
+    if length(styles) != 0
+        style!(comp, styles ...)
+    end
+    comp::Component{:g}
+end
+
+const text = Component{:text}
+const image = Component{:image}
+const circle = Component{:circle}
+const rect = Component{:rect}
+const path = Component{:path}
+const line = Component{:line}
+const ellipse = Component{:ellipse}
+const polyline = Component{:polyline}
+const polygon = Component{:polygon}
+const use = Component{:use}
 
 export circle, path, rect
 export M!, L!, Z!, Q!
