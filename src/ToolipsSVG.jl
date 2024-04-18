@@ -9,11 +9,10 @@ This module brings an array of different Components, as well as making things
 work more thoroughly with paths.
 """
 module ToolipsSVG
-using Toolips
-import Base: size, reshape
-import Toolips: AbstractComponent, Servable, write!, AbstractConnection
-
-function write!(c::AbstractConnection, svp::Component{:path})
+import Base: size, reshape, string
+using ToolipsServables
+# TODO Rewrite:
+function string(svp::Component{:path})
     open_tag::String = "<$(svp.tag) id=$(svp.name)"
     text::String = ""
     [begin
@@ -39,7 +38,14 @@ function write!(c::AbstractConnection, svp::Component{:path})
 end
 
 """
+```julia
+M!(path::Component{:path}, x::Number, y::Number) -> ::String
+```
 
+---
+```example
+
+```
 """
 M!(path::Component{:path}, x::Number, y::Number) = path["d"] = path["d"] * "M$x $y "
 
@@ -67,27 +73,72 @@ function C!(x::Number, y::Number, a1::Number, a2::Number, a4::Number)
     path[:d] = path[:d] * "C$x,$y $a1, $a2 $a3, $a4 "
 end
 
+"""
+```julia
+size(comp::Component{<:Any}) -> ::Tuple{Int64, Int64}
+```
+Returns the x/y dimensions of any SVG `Component` with a `size` binding. 
+Position and size for different SVGComponents is stored differently, so this 
+    `Function` is used with multiple dispatch to get the size of any component.
+`ToolipsSVG` provides bindings for`Component{:rect}`, `Component{:circle}`, `Component{:star}`, and `Component{:polyshape}`.
+Size may also be set with dispatch using `set_size!`.
+---
+```example
+
+```
+- See also: `position`, `star`, `polyshape`, `Component`, `set_size!`, `set_position!`
+"""
 size(comp::Component{<:Any}) = (comp[:width], comp[:height])
 size(comp::Component{:rect}) = (comp[:width], comp[:height])
 size(comp::Component{:circle}) = (comp[:r], comp[:r])
 
+"""
+```julia
+position(comp::Component{<:Any}) -> ::Tuple{Int64, Int64}
+```
+Similar to `size(comp::Component{<:Any})`, this `Function` is 
+used to get the position of many different SVG component types 
+in the same way. Also like size, position may also be set with 
+`set_position!`.
+---
+```example
+
+```
+- See also: `size(<:ToolipsSVG.ToolipsServables.AbstractComponent)`, `set_size!`, `set_position!`
+"""
 position(comp::Component{<:Any}) = (comp[:x], comp[:y])
 position(comp::Component{:circle}) = (comp[:cx] + comp[:r], comp[:cy] + comp[:r])
 
+"""
+```julia
+set_size!(comp::Component{<:Any}, w::Int64, h::Int64) -> ::Int64
+```
+`set_size` sets the size of the `Component` `comp`, can be used 
+with multiple dispatch to create consistent size keying for multiple 
+    SVG element types.
+---
+```example
+
+```
+- See also: `position`, `star`, `polyshape`, `Component`
+"""
 set_size!(comp::Component{<:Any}, w::Int64, h::Int64) = comp[:width], comp[:height] = w, h
 set_size!(comp::Component{:circle}, w::Int64, h::Int64) = comp[:r] = width
 
+"""
+```julia
+set_position!(comp::Component{<:Any}, x::Number, y::Number) -> ::Number
+```
+Sets the position of `comp` to `x` and `y`.
+---
+```example
+
+```
+- See also: `position`, `star`, `polyshape`, `Component`
+"""
 set_position!(comp::Component{<:Any}, x::Number, y::Number) = comp[:x], comp[:y] = x, y
 
 set_position!(comp::Component{:circle}, x::Number, y::Number) = comp[:cx], comp[:cy] = x, y
-
-g(name::String, styles::Pair{String, String} ...; args ...) = begin
-    comp::Component{:g} = Component(name, "g", args ...)
-    if length(styles) != 0
-        style!(comp, styles ...)
-    end
-    comp::Component{:g}
-end
 
 const text = Component{:text}
 const image = Component{:image}
@@ -99,8 +150,18 @@ const ellipse = Component{:ellipse}
 const polyline = Component{:polyline}
 const polygon = Component{:polygon}
 const use = Component{:use}
+const g = Component{:g}
 
-struct SVGShape{T <: Any} end
+"""
+### abstract type SVGShape{T <: Any}
+The `SVGShape` is used as a parameteric type to represent shape. 
+This is used to create functions where a shape might want to be 
+provided in an argument. For instance, `reshape` uses the `SVGShape` 
+to turn a `Component` into a different `Component`, of a different shape, 
+with the same `size` and `position`
+- See also: 
+"""
+abstract type SVGShape{T <: Any} end
 
 get_shape(comp::Component{<:Any}) = SVGShape{typeof(comp).parameters[1]}()
 
@@ -120,8 +181,7 @@ end
 function star(name::String, p::Pair{String, <:Any} ...; x = 0::Int64, y = 0::Int64, points::Int64 = 5, 
     outer_radius::Int64 = 100, inner_radius::Int64 = 200, angle::Number = pi / points, args ...)
     spoints = star_points(x, y, points, outer_radius, inner_radius, angle)
-    comp = Component(name, "star", "points" => "'$spoints'", p ..., args ...)
-    comp.tag = "polygon"
+    comp = Component{:star}(name, "points" => "'$spoints'", tag = "polygon", p ...; args ...)
     push!(comp.properties, :x => x, :y => y, :r => outer_radius, :angle => angle, 
     :np => points, :ir => inner_radius)
     comp::Component{:star}
@@ -146,13 +206,12 @@ function shape_points(x::Int64, y::Int64, r::Int64, sides::Int64, angle::Number)
     end for i in 1:sides], ",")::String
 end
 
-function shape(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0, 
+function polyshape(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0, 
     sides::Int64 = 3, r::Int64 = 100, angle::Number = 2 * pi / sides, args ...)
     points = shape_points(x, y, r, sides, angle)
-    comp = Component(name, "shape", "points" => "'$points'", p ..., args ...)
-    comp.tag = "polygon"
+    comp = Component{:polyshape}(name, tag = "polygon", "points" => "'$points'", p ..., args ...)
     push!(comp.properties, :x => x, :y => y, :r => r, :sides => sides, :angle => angle)
-    comp::Component{:shape}
+    comp::Component{:polyshape}
 end
 
 function size(comp::Component{:shape})
@@ -181,8 +240,6 @@ function reshape(comp::Component{:circle}, into::SVGShape{:shape}; sides::Int64 
     s = ToolipsSVG.position(comp)
     shape(comp.name, x = s[1], y = s[2], sides = sides, r = r, angle = angle)::Component{:shape}
 end
-
-
 
 export circle, path, rect, star, shape, set_position!
 export M!, L!, Z!, Q!
