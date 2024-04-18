@@ -163,9 +163,46 @@ with the same `size` and `position`
 """
 abstract type SVGShape{T <: Any} end
 
-get_shape(comp::Component{<:Any}) = SVGShape{typeof(comp).parameters[1]}()
+"""
+```julia
+get_shape(comp::Component{<:Any}) -> ::SVGShape{<:Any}
+---
+```example
 
-reshape(comp::Component{<:Any}, into::Symbol; args ...) = reshape(shape, GattinoShape{into}(); args ...)
+```
+"""
+get_shape(comp::Component{<:Any}) = SVGShape{typeof(comp).parameters[1]}
+
+"""
+```julia
+set_shape!(comp::Component{<:Any}, into::Symbol; args ...)
+---
+`set_shape!` is used to turn a shape into another shape with the same 
+size and position.
+
+```example
+
+```
+"""
+set_shape!(comp::Component{<:Any}, into::Symbol; args ...) = set_shape!(shape, SVGShape{into}; args ...)
+
+function set_shape!(shape::Component{:circle}, into::SVGShape{:star}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
+    points::Int64 = 5, args ...)
+    s = ToolipsSVG.position(shape)
+    star(shape.name, x = s[1], y = s[2], outer_radius = outer_radius, inner_radius = inner_radius, points = points)::Component{:star}
+end
+
+function set_shape!(shape::Component{:circle}, into::SVGShape{:square}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
+    points::Int64 = 5, args ...)
+    xy = ToolipsSVG.position(shape)
+    rad = shape[:r]
+    rect(randstring(4), x = xy[1] - rad, y = xy[2] - rad, width = rad, height = rad)::Component{:rect}
+end
+
+function set_shape!(comp::Component{:circle}, into::SVGShape{:shape}; sides::Int64 = 3, r::Int64 = 5, angle::Number = 2 * pi / sides, args ...)
+    s = ToolipsSVG.position(comp)
+    shape(comp.name, x = s[1], y = s[2], sides = sides, r = r, angle = angle)::Component{:shape}
+end
 
 function star_points(x::Int64, y::Int64, points::Int64, outer_radius::Int64, inner_radius::Int64, 
     angle::Number)
@@ -178,10 +215,23 @@ function star_points(x::Int64, y::Int64, points::Int64, outer_radius::Int64, inn
     end for (e, i) in enumerate(range(0, step * (points * 2), step = step))], ",")::String
 end
 
-function star(name::String, p::Pair{String, <:Any} ...; x = 0::Int64, y = 0::Int64, points::Int64 = 5, 
+"""
+```julia
+star(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0, points::Int64 = 5, 
+outer_radius::Int64 = 100, inner_radius::Int64 = 200, angle::Number = pi / points, args ...) -> ::Component{:star}
+```
+Builds a special `SVG` `:star` `Component`. This is a `:polygon` tagged element 
+that is specially typed in order to become a composable star. Similarly, `ToolipsSVG` also provides the 
+`polyshape` `Component`.
+---
+```example
+
+```
+"""
+function star(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0, points::Int64 = 5, 
     outer_radius::Int64 = 100, inner_radius::Int64 = 200, angle::Number = pi / points, args ...)
     spoints = star_points(x, y, points, outer_radius, inner_radius, angle)
-    comp = Component{:star}(name, "points" => "'$spoints'", tag = "polygon", p ...; args ...)
+    comp::Component{:star} = Component{:star}(name, "points" => "'$spoints'", p ...; tag = "polygon", args ...)
     push!(comp.properties, :x => x, :y => y, :r => outer_radius, :angle => angle, 
     :np => points, :ir => inner_radius)
     comp::Component{:star}
@@ -206,39 +256,29 @@ function shape_points(x::Int64, y::Int64, r::Int64, sides::Int64, angle::Number)
     end for i in 1:sides], ",")::String
 end
 
+"""
+```julia
+star(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0,
+sides::Int64 = 3, r::Int64 = 100, angle::Number = 2 * pi / sides, args ...) -> ::Component{:star}
+```
+Builds a special `SVG` `:star` `Component`. This is a `:polygon` tagged element 
+that is specially typed in order to become a composable star. Similarly, `ToolipsSVG` also provides the 
+`polyshape` `Component`.
+---
+```example
+
+```
+"""
 function polyshape(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0, 
     sides::Int64 = 3, r::Int64 = 100, angle::Number = 2 * pi / sides, args ...)
     points = shape_points(x, y, r, sides, angle)
-    comp = Component{:polyshape}(name, tag = "polygon", "points" => "'$points'", p ..., args ...)
+    comp::Component{:polyshape} = Component{:polyshape}(name, "points" => "'$points'", p ...; tag = "polygon", args ...)
     push!(comp.properties, :x => x, :y => y, :r => r, :sides => sides, :angle => angle)
     comp::Component{:polyshape}
 end
 
-function size(comp::Component{:shape})
+function size(comp::Component{:polyshape})
     (comp[:r], comp[:r])
-end
-
-function reshape(con::AbstractContext, layer::String, into::Symbol; args ...)
-    shape = GattinoShape{into}()
-    con.window[:children][layer][:children] = [reshape(comp, shape, args ...) for comp in con.window[:children][layer][:children]]
-end
-
-function reshape(shape::Component{:circle}, into::SVGShape{:star}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
-    points::Int64 = 5, args ...)
-    s = ToolipsSVG.position(shape)
-    star(shape.name, x = s[1], y = s[2], outer_radius = outer_radius, inner_radius = inner_radius, points = points)::Component{:star}
-end
-
-function reshape(shape::Component{:circle}, into::SVGShape{:square}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
-    points::Int64 = 5, args ...)
-    xy = ToolipsSVG.position(shape)
-    rad = shape[:r]
-    rect(randstring(4), x = xy[1] - rad, y = xy[2] - rad, width = rad, height = rad)::Component{:rect}
-end
-
-function reshape(comp::Component{:circle}, into::SVGShape{:shape}; sides::Int64 = 3, r::Int64 = 5, angle::Number = 2 * pi / sides, args ...)
-    s = ToolipsSVG.position(comp)
-    shape(comp.name, x = s[1], y = s[2], sides = sides, r = r, angle = angle)::Component{:shape}
 end
 
 export circle, path, rect, star, shape, set_position!
