@@ -9,7 +9,7 @@ This module brings an array of different Components, as well as making things
 work more thoroughly with paths.
 """
 module ToolipsSVG
-import Base: size, reshape, string
+import Base: size, string
 using ToolipsServables
 # TODO Rewrite:
 function string(svp::Component{:path})
@@ -94,7 +94,7 @@ size(comp::Component{:circle}) = (comp[:r], comp[:r])
 
 """
 ```julia
-position(comp::Component{<:Any}) -> ::Tuple{Int64, Int64}
+get_position(comp::Component{<:Any}) -> ::Tuple{Int64, Int64}
 ```
 Similar to `size(comp::Component{<:Any})`, this `Function` is 
 used to get the position of many different SVG component types 
@@ -106,8 +106,8 @@ in the same way. Also like size, position may also be set with
 ```
 - See also: `size(<:ToolipsSVG.ToolipsServables.AbstractComponent)`, `set_size!`, `set_position!`
 """
-position(comp::Component{<:Any}) = (comp[:x], comp[:y])
-position(comp::Component{:circle}) = (comp[:cx] + comp[:r], comp[:cy] + comp[:r])
+get_position(comp::Component{<:Any}) = (comp[:x], comp[:y])
+get_position(comp::Component{:circle}) = (comp[:cx] + comp[:r], comp[:cy] + comp[:r])
 
 """
 ```julia
@@ -156,7 +156,7 @@ const g = Component{:g}
 ### abstract type SVGShape{T <: Any}
 The `SVGShape` is used as a parameteric type to represent shape. 
 This is used to create functions where a shape might want to be 
-provided in an argument. For instance, `reshape` uses the `SVGShape` 
+provided in an argument. For instance, `set_shape!` uses the `SVGShape` 
 to turn a `Component` into a different `Component`, of a different shape, 
 with the same `size` and `position`
 - See also: 
@@ -186,21 +186,21 @@ size and position.
 """
 set_shape!(comp::Component{<:Any}, into::Symbol; args ...) = set_shape!(shape, SVGShape{into}; args ...)
 
-function set_shape!(shape::Component{:circle}, into::SVGShape{:star}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
+function set_shape!(shape::Component{:circle}, into::Type{SVGShape{:star}}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
     points::Int64 = 5, args ...)
-    s = ToolipsSVG.position(shape)
+    s = ToolipsSVG.get_position(shape)
     star(shape.name, x = s[1], y = s[2], outer_radius = outer_radius, inner_radius = inner_radius, points = points)::Component{:star}
 end
 
-function set_shape!(shape::Component{:circle}, into::SVGShape{:square}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
+function set_shape!(shape::Component{:circle}, into::Type{SVGShape{:square}}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
     points::Int64 = 5, args ...)
-    xy = ToolipsSVG.position(shape)
+    xy = ToolipsSVG.get_position(shape)
     rad = shape[:r]
     rect(randstring(4), x = xy[1] - rad, y = xy[2] - rad, width = rad, height = rad)::Component{:rect}
 end
 
-function set_shape!(comp::Component{:circle}, into::SVGShape{:shape}; sides::Int64 = 3, r::Int64 = 5, angle::Number = 2 * pi / sides, args ...)
-    s = ToolipsSVG.position(comp)
+function set_shape!(comp::Component{:circle}, into::Type{SVGShape{:shape}}; sides::Int64 = 3, r::Int64 = 5, angle::Number = 2 * pi / sides, args ...)
+    s = ToolipsSVG.get_position(comp)
     shape(comp.name, x = s[1], y = s[2], sides = sides, r = r, angle = angle)::Component{:shape}
 end
 
@@ -281,6 +281,6 @@ function size(comp::Component{:polyshape})
     (comp[:r], comp[:r])
 end
 
-export circle, path, rect, star, shape, set_position!
+export circle, path, rect, star, set_position!, get_shape, set_size!, get_position, svg, div, tmd, g, polyshape
 export M!, L!, Z!, Q!
 end # module
