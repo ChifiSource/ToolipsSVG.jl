@@ -12,29 +12,14 @@ module ToolipsSVG
 import Base: size, string
 using ToolipsServables
 # TODO Rewrite:
-function string(svp::Component{:path})
-    open_tag::String = "<$(svp.tag) id=$(svp.name)"
-    text::String = ""
-    [begin
-        special_keys::Vector{Any} = [:text, :children, "d"]
-        if ~(property in special_keys)
-            prop::String = string(svp.properties[property])
-            propkey::String = string(property)
-           open_tag = open_tag * " $propkey=$prop"
-        else
-            if property == :text
-                text = svp.properties[property]
-            elseif property == "d"
-                open_tag = open_tag * " d=\"$(svp["d"])\""
-            end
-        end
-    end for property in keys(svp.properties)]
-    write!(c, open_tag * ">")
-    if length(svp.properties[:children]) > 0
-        write!(c, svp.properties[:children])
-   end
-   write!(c, "$text</$(svp.tag)>")
-   write!(c, svp.extras)
+
+string(comp::Component{:path}) = begin
+    text::String = comp.properties[:text]
+    children = string(comp[:children])
+    extras = string(comp[:extras])
+    d_prop::String = "d=\"$(comp.properties["d"])\""
+    delete!(comp.properties, "d")
+    "$extras<$(comp.tag) id=\"$(comp.name)\" $(propstring(comp.properties)), $d_prop>$children$text</$(comp.tag)>"::String
 end
 
 """
@@ -107,11 +92,11 @@ in the same way. Also like size, position may also be set with
 - See also: `size(<:ToolipsSVG.ToolipsServables.AbstractComponent)`, `set_size!`, `set_position!`
 """
 get_position(comp::Component{<:Any}) = (comp[:x], comp[:y])
-get_position(comp::Component{:circle}) = (comp[:cx] + comp[:r], comp[:cy] + comp[:r])
+get_position(comp::Component{:circle}) = (comp[:cx], comp[:cy])
 
 """
 ```julia
-set_size!(comp::Component{<:Any}, w::Int64, h::Int64) -> ::Int64
+set_size!(comp::Component{<:Any}, w::Number, h::Number) -> ::Number
 ```
 `set_size` sets the size of the `Component` `comp`, can be used 
 with multiple dispatch to create consistent size keying for multiple 
@@ -122,8 +107,10 @@ with multiple dispatch to create consistent size keying for multiple
 ```
 - See also: `position`, `star`, `polyshape`, `Component`
 """
-set_size!(comp::Component{<:Any}, w::Int64, h::Int64) = comp[:width], comp[:height] = w, h
-set_size!(comp::Component{:circle}, w::Int64, h::Int64) = comp[:r] = width
+set_size!(comp::Component{<:Any}, w::Number, h::Number) = comp.properties[:width], comp.properties[:height] = w, h
+set_size!(comp::Component{:circle}, w::Number, h::Number) = begin
+    comp.properties[:r] = w
+end
 
 """
 ```julia
@@ -136,9 +123,9 @@ Sets the position of `comp` to `x` and `y`.
 ```
 - See also: `position`, `star`, `polyshape`, `Component`
 """
-set_position!(comp::Component{<:Any}, x::Number, y::Number) = comp[:x], comp[:y] = x, y
+set_position!(comp::Component{<:Any}, x::Number, y::Number) = comp.properties[:x], comp.properties[:y] = x, y
 
-set_position!(comp::Component{:circle}, x::Number, y::Number) = comp[:cx], comp[:cy] = x, y
+set_position!(comp::Component{:circle}, x::Number, y::Number) = comp.properties[:cx], comp.properties[:cy] = x, y
 
 const text = Component{:text}
 const image = Component{:image}
@@ -184,27 +171,27 @@ size and position.
 
 ```
 """
-set_shape!(comp::Component{<:Any}, into::Symbol; args ...) = set_shape!(shape, SVGShape{into}; args ...)
+set_shape!(comp::Component{<:Any}, into::Symbol; args ...) = set_shape!(comp, SVGShape{into}; args ...)
 
-function set_shape!(shape::Component{:circle}, into::Type{SVGShape{:star}}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
-    points::Int64 = 5, args ...)
+function set_shape!(shape::Component{:circle}, into::Type{SVGShape{:star}}; outer_radius::Number = 5, inner_radius::Number = 3,
+    points::Number = 5, args ...)
     s = ToolipsSVG.get_position(shape)
     star(shape.name, x = s[1], y = s[2], outer_radius = outer_radius, inner_radius = inner_radius, points = points)::Component{:star}
 end
 
-function set_shape!(shape::Component{:circle}, into::Type{SVGShape{:square}}; outer_radius::Int64 = 5, inner_radius::Int64 = 3,
-    points::Int64 = 5, args ...)
+function set_shape!(shape::Component{:circle}, into::Type{SVGShape{:square}}; outer_radius::Number = 5, inner_radius::Number = 3,
+    points::Number = 5, args ...)
     xy = ToolipsSVG.get_position(shape)
     rad = shape[:r]
     rect(randstring(4), x = xy[1] - rad, y = xy[2] - rad, width = rad, height = rad)::Component{:rect}
 end
 
-function set_shape!(comp::Component{:circle}, into::Type{SVGShape{:shape}}; sides::Int64 = 3, r::Int64 = 5, angle::Number = 2 * pi / sides, args ...)
+function set_shape!(comp::Component{:circle}, into::Type{SVGShape{:shape}}; sides::Number = 3, r::Number = 5, angle::Number = 2 * pi / sides, args ...)
     s = ToolipsSVG.get_position(comp)
     shape(comp.name, x = s[1], y = s[2], sides = sides, r = r, angle = angle)::Component{:shape}
 end
 
-function star_points(x::Int64, y::Int64, points::Int64, outer_radius::Int64, inner_radius::Int64, 
+function star_points(x::Number, y::Number, points::Number, outer_radius::Number, inner_radius::Number, 
     angle::Number)
     step = pi / points
     join([begin
@@ -217,8 +204,8 @@ end
 
 """
 ```julia
-star(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0, points::Int64 = 5, 
-outer_radius::Int64 = 100, inner_radius::Int64 = 200, angle::Number = pi / points, args ...) -> ::Component{:star}
+star(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0, points::Number = 5, 
+outer_radius::Number = 100, inner_radius::Number = 200, angle::Number = pi / points, args ...) -> ::Component{:star}
 ```
 Builds a special `SVG` `:star` `Component`. This is a `:polygon` tagged element 
 that is specially typed in order to become a composable star. Similarly, `ToolipsSVG` also provides the 
@@ -228,8 +215,8 @@ that is specially typed in order to become a composable star. Similarly, `Toolip
 
 ```
 """
-function star(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0, points::Int64 = 5, 
-    outer_radius::Int64 = 100, inner_radius::Int64 = 200, angle::Number = pi / points, args ...)
+function star(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0, points::Number = 5, 
+    outer_radius::Number = 100, inner_radius::Number = 200, angle::Number = pi / points, args ...)
     spoints = star_points(x, y, points, outer_radius, inner_radius, angle)
     comp::Component{:star} = Component{:star}(name, "points" => "'$spoints'", p ...; tag = "polygon", args ...)
     push!(comp.properties, :x => x, :y => y, :r => outer_radius, :angle => angle, 
@@ -248,7 +235,7 @@ function size(comp::Component{:star})
     (comp[:r], comp[:r])
 end
 
-function shape_points(x::Int64, y::Int64, r::Int64, sides::Int64, angle::Number)
+function shape_points(x::Number, y::Number, r::Number, sides::Number, angle::Number)
     join([begin
         posx = x + r * sin(i * angle)
         posy = y + r * cos(i * angle)
@@ -258,8 +245,8 @@ end
 
 """
 ```julia
-star(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0,
-sides::Int64 = 3, r::Int64 = 100, angle::Number = 2 * pi / sides, args ...) -> ::Component{:star}
+star(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0,
+sides::Number = 3, r::Number = 100, angle::Number = 2 * pi / sides, args ...) -> ::Component{:star}
 ```
 Builds a special `SVG` `:star` `Component`. This is a `:polygon` tagged element 
 that is specially typed in order to become a composable star. Similarly, `ToolipsSVG` also provides the 
@@ -269,8 +256,8 @@ that is specially typed in order to become a composable star. Similarly, `Toolip
 
 ```
 """
-function polyshape(name::String, p::Pair{String, <:Any} ...; x::Int64 = 0, y::Int64 = 0, 
-    sides::Int64 = 3, r::Int64 = 100, angle::Number = 2 * pi / sides, args ...)
+function polyshape(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0, 
+    sides::Number = 3, r::Number = 100, angle::Number = 2 * pi / sides, args ...)
     points = shape_points(x, y, r, sides, angle)
     comp::Component{:polyshape} = Component{:polyshape}(name, "points" => "'$points'", p ...; tag = "polygon", args ...)
     push!(comp.properties, :x => x, :y => y, :r => r, :sides => sides, :angle => angle)
@@ -281,6 +268,7 @@ function size(comp::Component{:polyshape})
     (comp[:r], comp[:r])
 end
 
-export circle, path, rect, star, set_position!, get_shape, set_size!, get_position, svg, div, tmd, g, polyshape
+export circle, path, rect, star, svg, div, tmd, g, polyshape, line, path, image, text, polyline, polygon, use, ellipse
+export set_position!, get_shape, set_size!, get_position, polyshape, Component, AbstractComponent, set_shape!
 export M!, L!, Z!, Q!
 end # module
