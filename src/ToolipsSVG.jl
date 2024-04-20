@@ -11,16 +11,6 @@ work more thoroughly with paths.
 module ToolipsSVG
 import Base: size, string
 using ToolipsServables
-# TODO Rewrite:
-
-string(comp::Component{:path}) = begin
-    text::String = comp.properties[:text]
-    children = string(comp[:children])
-    extras = string(comp[:extras])
-    d_prop::String = "d='$(comp["d"])'\""
-    props::String = ToolipsServables.propstring(filter(k -> k == "d", comp.properties))
-    "$extras<$(comp.tag) id=\"$(comp.name)\" $props $d_prop>$children$text</$(comp.tag)>"::String
-end
 
 """
 ```julia
@@ -366,6 +356,6 @@ function size(comp::Component{:polyshape})
 end
 
 export circle, path, rect, star, svg, div, tmd, g, polyshape, line, path, image, text, polyline, polygon, use, ellipse
-export set_position!, get_shape, set_size!, get_position, polyshape, Component, AbstractComponent, set_shape!
+export set_position!, get_shape, set_size!, get_position, polyshape, Component, AbstractComponent, set_shape!, style!
 export M!, L!, Z!, Q!
 end # module
