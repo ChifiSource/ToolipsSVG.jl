@@ -7,6 +7,42 @@ This software is MIT-licensed.
 ### ToolipsSVG
 This module brings an array of different Components, as well as making things
 work more thoroughly with paths.
+###### exports
+Path interface
+- `M!`
+- `L!`
+- `Z!`
+- `Q!`
+- `C!`
+- `A!`
+
+Position, shape, and size.
+- `size(::Component{<:Any})`
+- `set_size!`
+- `get_position`
+- `set_position!`
+- `get_shape`
+- `set_shape!`
+
+Regular Components
+- `text`
+- `path`
+- `image`
+- `circle`
+- `rect`
+- `line`
+- `ellipse`
+- `polygon`
+- `polyline`
+- `use`
+- `g`
+- `svg`
+- `div`
+- `tmd`
+
+SVG Shapes
+- `star`
+- `polyshape`
 """
 module ToolipsSVG
 import Base: size, string
@@ -110,7 +146,12 @@ Q!(path::Component{:path}, a::Any ...) -> ::String
 performs a quadratic bezier command.
 ---
 ```example
-
+new_path = path("new-path")
+M!(new_path, "100,250")
+Q!(new_path, "250,100", "400,250")
+Z!(new_path)
+# -- display
+display("text/html", window)
 ```
 """
 Q!(path::Component{:path}, a::Any ...) = path[:d] = path[:d] * "Q$(join((string(el) for el in a), " "))"
@@ -121,10 +162,6 @@ C!(path::Component{:path}, a::Any ...) -> ::String
 ```
 `C!` adds a `C` to the `d` data of a `path`.  The `C` option 
 performs a cubic bezier command.
----
-```example
-
-```
 """
 C!(path::Component{:path}, a::Any ...) = path[:d] = path[:d] * "C$(join((string(el) for el in a), " "))"
 
@@ -134,10 +171,6 @@ A!(path::Component{:path}, a::Any ...) -> ::String
 ```
 `A!` adds a `A` to the `d` data of a `path`.  The `A` option 
 performs an eliptical arch.
----
-```example
-
-```
 """
 A!(path::Component{:path}, a::Any ...) = path[:d] = path[:d] * "A$(join((string(el) for el in a), " "))"
 
@@ -152,7 +185,14 @@ Position and size for different SVGComponents is stored differently, so this
 Size may also be set with dispatch using `set_size!`.
 ---
 ```example
+using ToolipsSVG
+circ = circle("sample", cx = 5, cy = 5, r = 6)
+size(circ)
+(6, 6)
 
+rct = rect("samp-rect", x = 5, y = 5, width = 20, height = 10)
+size(rct)
+(20, 10)
 ```
 - See also: `position`, `star`, `polyshape`, `Component`, `set_size!`, `set_position!`
 """
@@ -170,7 +210,10 @@ in the same way. Also like size, position may also be set with
 `set_position!`.
 ---
 ```example
-
+using ToolipsSVG
+rct = rect("samp-rect", x = 5, y = 5, width = 20, height = 10)
+get_position(rct)
+(5, 5)
 ```
 - See also: `size(<:ToolipsSVG.ToolipsServables.AbstractComponent)`, `set_size!`, `set_position!`
 """
@@ -186,9 +229,21 @@ with multiple dispatch to create consistent size keying for multiple
     SVG element types.
 ---
 ```example
+using ToolipsSVG
+circ = circle("sample", cx = 5, cy = 5, r = 6)
+size(circ)
+(6, 6)
+set_size!(circ, 9, 10)
+size(circ)
+(9, 10)
 
+newrect = rect("examplerect", x = 50, y = 70, width = 400, height = 200)
+set_size!(newrect, size(circ) ...)
+
+size(newrect)
+(9, 10)
 ```
-- See also: `position`, `star`, `polyshape`, `Component`
+- See also: `size`, `star`, `polyshape`, `set_position!`, set_shape!
 """
 set_size!(comp::Component{<:Any}, w::Number, h::Number) = comp.properties[:width], comp.properties[:height] = w, h
 set_size!(comp::Component{:circle}, w::Number, h::Number) = begin
@@ -202,9 +257,15 @@ set_position!(comp::Component{<:Any}, x::Number, y::Number) -> ::Number
 Sets the position of `comp` to `x` and `y`.
 ---
 ```example
+newrect = rect("examplerect", x = 50, y = 70, width = 400, height = 200)
+get_position(new_rect)
+(50, 760)
 
+set_position!(new_rect, (70, 90) ...)
+get_position(new_rect)
+(70, 90)
 ```
-- See also: `position`, `star`, `polyshape`, `Component`
+- See also: `get_position`, `get_shape`, `set_shape!`, `size(::Component{<:Any})`
 """
 set_position!(comp::Component{<:Any}, x::Number, y::Number) = comp.properties[:x], comp.properties[:y] = x, y
 
@@ -233,7 +294,7 @@ This is used to create functions where a shape might want to be
 provided in an argument. For instance, `set_shape!` uses the `SVGShape` 
 to turn a `Component` into a different `Component`, of a different shape, 
 with the same `size` and `position`
-- See also: 
+- See also: `get_shape`, `set_shape`
 """
 abstract type SVGShape{T <: Any} end
 
@@ -241,9 +302,23 @@ abstract type SVGShape{T <: Any} end
 ```julia
 get_shape(comp::Component{<:Any}) -> ::SVGShape{<:Any}
 ---
+Retrieves the `SVGShape` of `comp`, which is simply the component's 
+type parameter. `SVGShape` is used to provide conversions with `set_shape!`.
 ```example
+firstshape::Component{:rect} = rect("sample", x = 5, y = 5, )
+second_shape::Component{:star} = star("secondsample", x = 20, y = 10)
+shape::SVGShape{:star} = get_shape(second_shape)
 
+set_shape!(firstshape, shape)
+get_position(firstshape)
+(5, 5)
+
+println(get_shape(firstshape))
+SVGShape{:star}
+# or
+set_shape!(firstshape, :rect)
 ```
+- `set_shape!`, `SVGShape`, `get_shape`, `ToolipsSVG`, `size(::Component{<:Any})`
 """
 get_shape(comp::Component{<:Any}) = SVGShape{typeof(comp).parameters[1]}
 
@@ -255,7 +330,18 @@ set_shape!(comp::Component{<:Any}, into::Symbol; args ...)
 size and position.
 
 ```example
+firstshape::Component{:rect} = rect("sample", x = 5, y = 5, )
+second_shape::Component{:star} = star("secondsample", x = 20, y = 10)
+shape::SVGShape{:star} = get_shape(second_shape)
 
+set_shape!(firstshape, shape)
+get_position(firstshape)
+(5, 5)
+
+println(get_shape(firstshape))
+SVGShape{:star}
+# or
+set_shape!(firstshape, :rect)
 ```
 """
 set_shape!(comp::Component{<:Any}, into::Symbol; args ...) = set_shape!(comp, SVGShape{into}; args ...)
@@ -311,7 +397,8 @@ that is specially typed in order to become a composable star. Similarly, `Toolip
 `polyshape` `Component`.
 ---
 ```example
-
+using ToolipsSVG
+newshape::Component{:star} = star("mynewstar", x = 5, y = 6, points = 6)
 ```
 """
 function star(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0, points::Number = 5, 
@@ -344,15 +431,15 @@ end
 
 """
 ```julia
-star(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0,
+polyshape(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0,
 sides::Number = 3, r::Number = 100, angle::Number = 2 * pi / sides, args ...) -> ::Component{:star}
 ```
-Builds a special `SVG` `:star` `Component`. This is a `:polygon` tagged element 
-that is specially typed in order to become a composable star. Similarly, `ToolipsSVG` also provides the 
-`polyshape` `Component`.
+Builds a `polyshape` component, which is an `SVGShape` compatible with SVG functions from 
+`ToolipsSVG`.
 ---
 ```example
-
+using ToolipsSVG
+newshape::Component{:polyshape} = polyshape("mynewpoly", x = 5, y = 6, sides = 4)
 ```
 """
 function polyshape(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0, 
