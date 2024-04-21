@@ -260,22 +260,28 @@ size and position.
 """
 set_shape!(comp::Component{<:Any}, into::Symbol; args ...) = set_shape!(comp, SVGShape{into}; args ...)
 
-function set_shape!(shape::Component{:circle}, into::Type{SVGShape{:star}}; outer_radius::Number = 5, inner_radius::Number = 3,
+function set_shape!(shape::Component{<:Any}, into::Type{SVGShape{:star}}; outer_radius::Number = 5, inner_radius::Number = 3,
     points::Number = 5, args ...)
-    s = ToolipsSVG.get_position(shape)
+    s = get_position(shape)
     star(shape.name, x = s[1], y = s[2], outer_radius = outer_radius, inner_radius = inner_radius, points = points)::Component{:star}
 end
 
-function set_shape!(shape::Component{:circle}, into::Type{SVGShape{:square}}; outer_radius::Number = 5, inner_radius::Number = 3,
-    points::Number = 5, args ...)
-    xy = ToolipsSVG.get_position(shape)
-    rad = shape[:r]
-    rect(randstring(4), x = xy[1] - rad, y = xy[2] - rad, width = rad, height = rad)::Component{:rect}
+function set_shape!(shape::Component{<:Any}, into::Type{SVGShape{:square}}; args ...)
+    xy = get_position(shape)
+    rad = size(comp)
+    rect(randstring(4), x = xy[1], y = xy[2], width = rad[1], height = rad[1])::Component{:rect}
 end
 
-function set_shape!(comp::Component{:circle}, into::Type{SVGShape{:shape}}; sides::Number = 3, r::Number = 5, angle::Number = 2 * pi / sides, args ...)
-    s = ToolipsSVG.get_position(comp)
-    shape(comp.name, x = s[1], y = s[2], sides = sides, r = r, angle = angle)::Component{:shape}
+function set_shape!(comp::Component{<:Any}, into::Type{SVGShape{:polyshape}}; sides::Number = 3, angle::Number = 2 * pi / sides, args ...)
+    s = get_position(comp)
+    rad = size(comp)
+    polyshape(comp.name, x = s[1], y = s[2], sides = sides, r = rad[1], angle = angle)::Component{:polyshape}
+end
+
+function set_shape!(shape::Component{<:Any}, into::Type{SVGShape{:rect}}; args ...)
+    s = get_position(shape)
+    dims = size(comp)
+    rect(shape.name, x = s[1], y = s[2], width = dims[1], height = dims[2])::Component{:rect}
 end
 
 function star_points(x::Number, y::Number, points::Number, outer_radius::Number, inner_radius::Number, 
