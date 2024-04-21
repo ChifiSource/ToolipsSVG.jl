@@ -43,7 +43,7 @@ using ToolipsSVG.ToolipsServables
             @test typeof(star) == Component{:star}
             circ = set_shape!(star, :circle)
             @test typeof(circ) == Component{:circle}
-            @test circ[:cx] == 50 || circ[:cx] == "50"==#
+            @test string(circ[:cx]) == "5"
         end
     end
 end

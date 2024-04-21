@@ -284,6 +284,12 @@ function set_shape!(shape::Component{<:Any}, into::Type{SVGShape{:rect}}; args .
     rect(shape.name, x = s[1], y = s[2], width = dims[1], height = dims[2])::Component{:rect}
 end
 
+function set_shape!(shape::Component{<:Any}, into::Type{SVGShape{:circle}}; args ...)
+    s = get_position(shape)
+    r = size(shape)[1]
+    circle(shape.name, cx = s[1], cy = s[2], r = r)::Component{:circle}
+end
+
 function star_points(x::Number, y::Number, points::Number, outer_radius::Number, inner_radius::Number, 
     angle::Number)
     step = pi / points
