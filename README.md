@@ -4,8 +4,29 @@
 </br>
 </div>
 
-- [Documentation] not available
-- [Toolips](https://github.com/ChifiSource/Toolips.jl)
-- [Extension Gallery] not yet available
+ToolipsSVG provides SVG components, a `Component{:path}` mutation interface, a multiple dispatch interface for managing and setting size, shape, and positions of different components, and SVG shapes for [Toolips](https://github.com/ChifiSource/Toolips.jl) / [ToolipsServables](https://github.com/ChifiSource/ToolipsServables.jl).
+```julia
+using ToolipsSVG
 
-ToolipsSVG.jl is yet another toolips extension, this one sporting SVG-oriented Components to serve as a base visualization library. This will be recycling the `Component` structure from Toolips and putting context to SVGs. This brings the possibility of just about anything to be programmed using session syntax and SVGs, programmed animations, even! More work will gradually come in on this, until then contributions are appreciated!
+window = svg("main", width = 500, height = 500)
+squarepath = path("new-square")
+M!(squarepath, 50, 50)
+L!(squarepath, 100, 50)
+L!(squarepath, 100, 100)
+L!(squarepath, 50, 100)
+L!(squarepath, 50, 50)
+Z!(squarepath)
+
+push!(window, squarepath)
+display("text/html", window)
+```
+
+```julia
+st = star("sample", x= 100, y = 150, outer_radius = 15, inner_radius = 40, angle = 20)
+style!(st, "fill" => "orange", "stroke" => "green")
+push!(window, st)
+display("text/html", window)
+```
+## map
+- [get started](#get-started)
+  - [adding ToolipsSVG](#adding-toolipssvg)
