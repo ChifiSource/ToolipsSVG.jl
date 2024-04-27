@@ -33,6 +33,8 @@ display("text/html", window)
 - [components](#components)
   - [shapes](#shapes)
   - [paths](#paths)
+- [contributing](#contributing)
+  - [contributing guidelines](#guidelines)
 #### get started
 `ToolipsSVG` may be used with or without a `Toolips` server, but will require an SVG display output of some kind --for example an [IJulia](), [Olive](), [Pluto]() notebook, or [Electron]() window. To show components, call `display("text/html", ::AbstractComponent)`. This will usually be called whenever a `Component` is *shown*, or returned, as well.
 ```julia
@@ -155,6 +157,19 @@ cont
 <img src="https://github.com/ChifiSource/image_dump/blob/main/toolips/tlsvgsc/Screenshot%20from%202024-04-26%2018-31-25.png"></img>
 </div>
 
-Let's try a more complicated example:
+Let's try a more advanced example ...
 ```julia
 ```
+### contributing
+Thank you for lending a helping hand in the development of this package, and others like it. There are a myriad of different ways to contribute to this project.
+- submitting [issues](https://github.com/ChifiSource/ToolipsSVG.jl/issues)
+- creating packages which use `ToolipsSVG`
+- forking and pull-requesting your changes to this code
+- trying other [chifi](https://github.com/ChifiSource) projects.
+- contributing to other [chifi](https:://github.com/ChifiSource) projects (gives more attention here).
+##### guidelines
+- If there is no issue for what you want to do, create an issue.
+- If you have multiple issues, submit multiple issues rather than typing each issue into one issue.
+- Make sure the issue you are solving or feature you want to implement is still feasible on Unstable -- this is the top-level development branch which represents the latest unstable changes.
+- Please format your documentation using the technique presented in the rest of the file.
+- Make sure Pkg.test("ToolipsSVG") works with your version of ToolipsSVG before making a pull-request.
