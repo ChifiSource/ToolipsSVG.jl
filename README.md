@@ -118,17 +118,43 @@ In addition to just the basic components to work with, `ToolipsSVG` also include
 - `:polyshape`
 - `:star`
 
-Note that not *all* of these shapes are fully implemented with the API, for example you cannot `set_shape(::Component{:star}, :circle)`. These functions will be filled in as future patches come... The `:circle` component is completely binded. The shape interface consists of
+The shape interface consists of
 - `get_position`
 - `set_position!`
-- `get_size`
+- `size(::Component{<:Any})`
 - `set_size!`
-- `set_shape!`
+- `set_shape`
 - `get_shape`
 
+This interface provides us with an easy way to consistently get and set the position of different shapes and also translate shapes between eachother with `set_shape`.
 ```julia
 window[:children] = window[:children][1:3]
-window[:children] = [set_shape!(comp, :star) for comp in window[:children]]
+window[:children] = [set_shape(comp, :star) for comp in window[:children]]
 ```
+
+<img src="https://github.com/ChifiSource/image_dump/blob/main/toolips/tlsvgsc/Screenshot%20from%202024-04-26%2018-23-08.png"></img>
 #### paths
-Another feature that
+The last noteworthy feature in `ToolipsSVG` is an interface for drawing `d` data in paths. This is a rather small interface, but can be quite effective. Each argument will be provided to `d` with a space; beyond this, it is simply knowing how to use SVG.
+```julia
+using ToolipsSVG
+squarepath = path("new-square")
+M!(squarepath, 50, 50)
+L!(squarepath, 100, 50)
+L!(squarepath, 100, 100)
+L!(squarepath, 50, 100)
+L!(squarepath, 50, 50)
+Z!(squarepath)
+```
+```julia
+window = svg("main", width = 200, height = 200, children = [squarepath])
+cont = div("holder", children = [window])
+style!(cont, "padding" => 10px)
+cont
+```
+<div align="center">
+<img src="https://github.com/ChifiSource/image_dump/blob/main/toolips/tlsvgsc/Screenshot%20from%202024-04-26%2018-31-25.png"></img>
+</div>
+
+Let's try a more complicated example:
+```julia
+```
