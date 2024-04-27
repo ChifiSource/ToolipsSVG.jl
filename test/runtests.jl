@@ -39,9 +39,9 @@ using ToolipsSVG.ToolipsServables
             @test size(new_rect) == size(init_circ)
         end
         @testset "set shape" begin
-            star = set_shape!(new_rect, :star)
+            star = set_shape(new_rect, :star)
             @test typeof(star) == Component{:star}
-            circ = set_shape!(star, :circle)
+            circ = set_shape(star, :circle)
             @test typeof(circ) == Component{:circle}
             @test string(circ[:cx]) == "5"
         end

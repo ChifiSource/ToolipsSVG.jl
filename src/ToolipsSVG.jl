@@ -22,7 +22,7 @@ Position, shape, and size.
 - `get_position`
 - `set_position!`
 - `get_shape`
-- `set_shape!`
+- `set_shape`
 
 Regular Components
 - `text`
@@ -222,7 +222,7 @@ get_position(comp::Component{:circle}) = (comp[:cx], comp[:cy])
 
 """
 ```julia
-set_size!(comp::Component{<:Any}, w::Number, h::Number) -> ::Number
+set_size!(comp::Component{<:Any}, w::Any, h::Any) -> ::Any
 ```
 `set_size` sets the size of the `Component` `comp`, can be used 
 with multiple dispatch to create consistent size keying for multiple 
@@ -243,16 +243,16 @@ set_size!(newrect, size(circ) ...)
 size(newrect)
 (9, 10)
 ```
-- See also: `size`, `star`, `polyshape`, `set_position!`, set_shape!
+- See also: `size`, `star`, `polyshape`, `set_position!`, set_shape
 """
-set_size!(comp::Component{<:Any}, w::Number, h::Number) = comp.properties[:width], comp.properties[:height] = w, h
-set_size!(comp::Component{:circle}, w::Number, h::Number) = begin
+set_size!(comp::Component{<:Any}, w::Any, h::Any) = comp.properties[:width], comp.properties[:height] = w, h
+set_size!(comp::Component{:circle}, w::Any, h::Any) = begin
     comp.properties[:r] = w
 end
 
 """
 ```julia
-set_position!(comp::Component{<:Any}, x::Number, y::Number) -> ::Number
+set_position!(comp::Component{<:Any}, x::Any, y::Any) -> ::Any
 ```
 Sets the position of `comp` to `x` and `y`.
 ---
@@ -265,11 +265,11 @@ set_position!(new_rect, (70, 90) ...)
 get_position(new_rect)
 (70, 90)
 ```
-- See also: `get_position`, `get_shape`, `set_shape!`, `size(::Component{<:Any})`
+- See also: `get_position`, `get_shape`, `set_shape`, `size(::Component{<:Any})`
 """
-set_position!(comp::Component{<:Any}, x::Number, y::Number) = comp.properties[:x], comp.properties[:y] = x, y
+set_position!(comp::Component{<:Any}, x::Any, y::Any) = comp.properties[:x], comp.properties[:y] = x, y
 
-set_position!(comp::Component{:circle}, x::Number, y::Number) = comp.properties[:cx], comp.properties[:cy] = x, y
+set_position!(comp::Component{:circle}, x::Any, y::Any) = comp.properties[:cx], comp.properties[:cy] = x, y
 
 const text = Component{:text}
 const image = Component{:image}
@@ -291,7 +291,7 @@ const g = Component{:g}
 ### abstract type SVGShape{T <: Any}
 The `SVGShape` is used as a parameteric type to represent shape. 
 This is used to create functions where a shape might want to be 
-provided in an argument. For instance, `set_shape!` uses the `SVGShape` 
+provided in an argument. For instance, `set_shape` uses the `SVGShape` 
 to turn a `Component` into a different `Component`, of a different shape, 
 with the same `size` and `position`
 - See also: `get_shape`, `set_shape`
@@ -303,30 +303,30 @@ abstract type SVGShape{T <: Any} end
 get_shape(comp::Component{<:Any}) -> ::SVGShape{<:Any}
 ---
 Retrieves the `SVGShape` of `comp`, which is simply the component's 
-type parameter. `SVGShape` is used to provide conversions with `set_shape!`.
+type parameter. `SVGShape` is used to provide conversions with `set_shape`.
 ```example
 firstshape::Component{:rect} = rect("sample", x = 5, y = 5, )
 second_shape::Component{:star} = star("secondsample", x = 20, y = 10)
 shape::SVGShape{:star} = get_shape(second_shape)
 
-set_shape!(firstshape, shape)
+set_shape(firstshape, shape)
 get_position(firstshape)
 (5, 5)
 
 println(get_shape(firstshape))
 SVGShape{:star}
 # or
-set_shape!(firstshape, :rect)
+set_shape(firstshape, :rect)
 ```
-- `set_shape!`, `SVGShape`, `get_shape`, `ToolipsSVG`, `size(::Component{<:Any})`
+- `set_shape`, `SVGShape`, `get_shape`, `ToolipsSVG`, `size(::Component{<:Any})`
 """
 get_shape(comp::Component{<:Any}) = SVGShape{typeof(comp).parameters[1]}
 
 """
 ```julia
-set_shape!(comp::Component{<:Any}, into::Symbol; args ...)
+set_shape(comp::Component{<:Any}, into::Symbol; args ...)
 ---
-`set_shape!` is used to turn a shape into another shape with the same 
+`set_shape` is used to turn a shape into another shape with the same 
 size and position.
 
 ```example
@@ -334,50 +334,65 @@ firstshape::Component{:rect} = rect("sample", x = 5, y = 5, )
 second_shape::Component{:star} = star("secondsample", x = 20, y = 10)
 shape::SVGShape{:star} = get_shape(second_shape)
 
-set_shape!(firstshape, shape)
+set_shape(firstshape, shape)
 get_position(firstshape)
 (5, 5)
 
 println(get_shape(firstshape))
 SVGShape{:star}
 # or
-set_shape!(firstshape, :rect)
+set_shape(firstshape, :rect)
 ```
 """
-set_shape!(comp::Component{<:Any}, into::Symbol; args ...) = set_shape!(comp, SVGShape{into}; args ...)
+set_shape(comp::Component{<:Any}, into::Symbol; args ...) = set_shape(comp, SVGShape{into}; args ...)
 
-function set_shape!(shape::Component{<:Any}, into::Type{SVGShape{:star}}; outer_radius::Number = 5, inner_radius::Number = 3,
-    points::Number = 5, args ...)
-    s = get_position(shape)
-    star(shape.name, x = s[1], y = s[2], outer_radius = outer_radius, inner_radius = inner_radius, points = points)::Component{:star}
-end
-
-function set_shape!(shape::Component{<:Any}, into::Type{SVGShape{:square}}; args ...)
-    xy = get_position(shape)
-    rad = size(comp)
-    rect(randstring(4), x = xy[1], y = xy[2], width = rad[1], height = rad[1])::Component{:rect}
-end
-
-function set_shape!(comp::Component{<:Any}, into::Type{SVGShape{:polyshape}}; sides::Number = 3, angle::Number = 2 * pi / sides, args ...)
-    s = get_position(comp)
-    rad = size(comp)
-    polyshape(comp.name, x = s[1], y = s[2], sides = sides, r = rad[1], angle = angle)::Component{:polyshape}
-end
-
-function set_shape!(shape::Component{<:Any}, into::Type{SVGShape{:rect}}; args ...)
-    s = get_position(shape)
-    dims = size(comp)
-    rect(shape.name, x = s[1], y = s[2], width = dims[1], height = dims[2])::Component{:rect}
-end
-
-function set_shape!(shape::Component{<:Any}, into::Type{SVGShape{:circle}}; args ...)
+function set_shape(shape::Component{<:Any}, into::Type{SVGShape{:star}}; outer_radius::Any = 5, inner_radius::Any = 3,
+    points::Any = 5, args ...)
     s = get_position(shape)
     r = size(shape)[1]
-    circle(shape.name, cx = s[1], cy = s[2], r = r)::Component{:circle}
+    st::Component{:star} = star(shape.name, x = s[1], y = s[2], outer_radius = outer_radius, inner_radius = inner_radius, points = points)
+    merge!(st.properties, shape.properties)
+    st::Component{:star}
 end
 
-function star_points(x::Number, y::Number, points::Number, outer_radius::Number, inner_radius::Number, 
-    angle::Number)
+function set_shape(shape::Component{<:Any}, into::Type{SVGShape{:square}}; args ...)
+    xy = get_position(shape)
+    rad = size(shape)
+    square::Component{:square} = Component{:square}(shape.name, tag = "rect")::Component{:square}
+    square.properties = shape.properties
+    push!(square.properties, :x => xy[1], :y => xy[2], :width => rad[1], :height => rad[1])
+    square::Component{:square}
+end
+
+function set_shape(comp::Component{<:Any}, into::Type{SVGShape{:polyshape}}; sides::Any = 3, angle::Any = 2 * pi / sides, args ...)
+    s = get_position(comp)
+    rad = size(comp)
+    shp::Component{:polyshape} = polyshape(comp.name)::Component{:polyshape}
+    shp.properties = comp.properties
+    push!(shp.properties, :x => s[1], :y => s[2], :sides => sides, :r => rad[1], :angle => angle)
+    shp::Component{:polyshape}
+end
+
+function set_shape(shape::Component{<:Any}, into::Type{SVGShape{:rect}}; args ...)
+    s = get_position(shape)
+    dims = size(comp)
+    rct::Component{:rect} = rect(shape.name)::Component{:rect}
+    rct.properties = shape.properties
+    push!(rct.properties, :x => s[1], :y => s[2], :width => dims[1], :height => dims[2])
+    rct::Component{:rect}
+end
+
+function set_shape(shape::Component{<:Any}, into::Type{SVGShape{:circle}}; args ...)
+    s::Tuple{Int64, Int64} = get_position(shape)
+    r::Tuple{Int64, Int64} = size(shape)[1]
+    circ::Component{:circle} = circle(shape.name)
+    circ.properties = shape.properties
+    push!(circ.properties, :cx => s[1], :cy => s[2], :r => r)
+    circ::Component{:cirlce}
+end
+
+function star_points(x::Any, y::Any, points::Any, outer_radius::Any, inner_radius::Any, 
+    angle::Any)
     step = pi / points
     join([begin
         r = e%2 == 0 ? inner_radius : outer_radius
@@ -389,8 +404,8 @@ end
 
 """
 ```julia
-star(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0, points::Number = 5, 
-outer_radius::Number = 100, inner_radius::Number = 200, angle::Number = pi / points, args ...) -> ::Component{:star}
+star(name::String, p::Pair{String, <:Any} ...; x::Any = 0, y::Any = 0, points::Any = 5, 
+outer_radius::Any = 100, inner_radius::Any = 200, angle::Any = pi / points, args ...) -> ::Component{:star}
 ```
 Builds a special `SVG` `:star` `Component`. This is a `:polygon` tagged element 
 that is specially typed in order to become a composable star. Similarly, `ToolipsSVG` also provides the 
@@ -401,8 +416,8 @@ using ToolipsSVG
 newshape::Component{:star} = star("mynewstar", x = 5, y = 6, points = 6)
 ```
 """
-function star(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0, points::Number = 5, 
-    outer_radius::Number = 100, inner_radius::Number = 200, angle::Number = pi / points, args ...)
+function star(name::String, p::Pair{String, <:Any} ...; x::Any = 0, y::Any = 0, points::Any = 5, 
+    outer_radius::Any = 100, inner_radius::Any = 200, angle::Any = pi / points, args ...)
     spoints = star_points(x, y, points, outer_radius, inner_radius, angle)
     comp::Component{:star} = Component{:star}(name, "points" => "'$spoints'", p ...; tag = "polygon", args ...)
     push!(comp.properties, :x => x, :y => y, :r => outer_radius, :angle => angle, 
@@ -410,7 +425,7 @@ function star(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number
     comp::Component{:star}
 end
 
-set_position!(comp::Component{:star}, x::Number, y::Number) = begin
+set_position!(comp::Component{:star}, x::Any, y::Any) = begin
     pnts, angle, outer_radius, ir = comp[:np], comp[:angle], comp[:r], comp[:ir]
     spoints = star_points(x, y, pnts, outer_radius, ir, angle)
     comp["points"] = "'$spoints'"
@@ -421,7 +436,7 @@ function size(comp::Component{:star})
     (comp[:r], comp[:r])
 end
 
-function shape_points(x::Number, y::Number, r::Number, sides::Number, angle::Number)
+function shape_points(x::Any, y::Any, r::Any, sides::Any, angle::Any)
     join([begin
         posx = x + r * sin(i * angle)
         posy = y + r * cos(i * angle)
@@ -431,8 +446,8 @@ end
 
 """
 ```julia
-polyshape(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0,
-sides::Number = 3, r::Number = 100, angle::Number = 2 * pi / sides, args ...) -> ::Component{:star}
+polyshape(name::String, p::Pair{String, <:Any} ...; x::Any = 0, y::Any = 0,
+sides::Any = 3, r::Any = 100, angle::Any = 2 * pi / sides, args ...) -> ::Component{:star}
 ```
 Builds a `polyshape` component, which is an `SVGShape` compatible with SVG functions from 
 `ToolipsSVG`.
@@ -442,8 +457,8 @@ using ToolipsSVG
 newshape::Component{:polyshape} = polyshape("mynewpoly", x = 5, y = 6, sides = 4)
 ```
 """
-function polyshape(name::String, p::Pair{String, <:Any} ...; x::Number = 0, y::Number = 0, 
-    sides::Number = 3, r::Number = 100, angle::Number = 2 * pi / sides, args ...)
+function polyshape(name::String, p::Pair{String, <:Any} ...; x::Any = 0, y::Any = 0, 
+    sides::Any = 3, r::Any = 100, angle::Any = 2 * pi / sides, args ...)
     points = shape_points(x, y, r, sides, angle)
     comp::Component{:polyshape} = Component{:polyshape}(name, "points" => "'$points'", p ...; tag = "polygon", args ...)
     push!(comp.properties, :x => x, :y => y, :r => r, :sides => sides, :angle => angle)
@@ -455,6 +470,6 @@ function size(comp::Component{:polyshape})
 end
 
 export circle, path, rect, star, svg, div, tmd, g, polyshape, line, path, image, text, polyline, polygon, use, ellipse
-export set_position!, get_shape, set_size!, get_position, polyshape, Component, AbstractComponent, set_shape!, style!
-export M!, L!, Z!, Q!
+export set_position!, get_shape, set_size!, get_position, polyshape, Component, AbstractComponent, set_shape, style!
+export M!, L!, Z!, Q!, px, pt, percent, perc, in, s, ms
 end # module
