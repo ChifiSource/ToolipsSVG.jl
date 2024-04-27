@@ -33,8 +33,6 @@ display("text/html", window)
 - [components](#components)
   - [shapes](#shapes)
   - [paths](#paths)
-  - [position and size](#position-and-size)
-  - [shape](#shape)
 #### get started
 `ToolipsSVG` may be used with or without a `Toolips` server, but will require an SVG display output of some kind --for example an [IJulia](), [Olive](), [Pluto]() notebook, or [Electron]() window. To show components, call `display("text/html", ::AbstractComponent)`. This will usually be called whenever a `Component` is *shown*, or returned, as well.
 ```julia
@@ -83,10 +81,54 @@ polygon
 use
 g
 ```
-All of these are normal components, which are used like any other component so long as the correct argument is provided.
+All of these are normal components, which are used like any other component. We provide `Pair{String, <:Any}` alongside key-word arguments to give properties with the first positional argument being the name.
 ```julia
+using ToolipsSVG
+w, h = 250, 250
+window = svg("julia_over", width = w, height = h)
+each_w = (w - 10) / 3
+each_height = h / 2
+circs = [begin
+          circ = circle(cx = (each_w * e), cy = each_height, r = 10)
+          style!(circ, "fill" => "#$color")
+          circ
+     end for (e, color) in enumerate(("D5635C", "60AD51", "AA79C1"))]
+
+window[:children] = circs
+window
 ```
+
+<div align="center">
+  <img src="https://github.com/ChifiSource/image_dump/blob/main/toolips/tlsvgsc/Screenshot%20from%202024-04-26%2017-46-05.png"></img>
+</div>
+
+`ToolipsSVG` also includes two special components, the `Component{:star}` and `Component{:polyshape}`. These are two different pre-made shapes with unique arguments that change how the shape is rendered. For example, a `star`.
+```julia
+newstar = star("newstar", x = 50, y = 50, points = 5, inner_radius = 14, outer_radius = 30)
+push!(window, newstar)
+```
+
+<img src="https://github.com/ChifiSource/image_dump/blob/main/toolips/tlsvgsc/Screenshot%20from%202024-04-26%2017-54-57.png"></img>
+
 ###### shapes
+In addition to just the basic components to work with, `ToolipsSVG` also includes a parametric shape interface. This interface has support for the following shapes:
+- `:circle`
+- `:rect`
+- `:square`
+- `:polyshape`
+- `:star`
+
+Note that not *all* of these shapes are fully implemented with the API, for example you cannot `set_shape(::Component{:star}, :circle)`. These functions will be filled in as future patches come... The `:circle` component is completely binded. The shape interface consists of
+- `get_position`
+- `set_position!`
+- `get_size`
+- `set_size!`
+- `set_shape!`
+- `get_shape`
+
+```julia
+window[:children] = window[:children][1:3]
+window[:children] = [set_shape!(comp, :star) for comp in window[:children]]
+```
 #### paths
-#### position and size
-#### shape
+Another feature that
