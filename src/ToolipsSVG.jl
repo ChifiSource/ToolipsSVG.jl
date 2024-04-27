@@ -384,11 +384,11 @@ end
 
 function set_shape(shape::Component{<:Any}, into::Type{SVGShape{:circle}}; args ...)
     s::Tuple{Int64, Int64} = get_position(shape)
-    r::Tuple{Int64, Int64} = size(shape)[1]
+    r::Int64 = size(shape)[1]
     circ::Component{:circle} = circle(shape.name)
     circ.properties = shape.properties
     push!(circ.properties, :cx => s[1], :cy => s[2], :r => r)
-    circ::Component{:cirlce}
+    circ::Component{:circle}
 end
 
 function star_points(x::Any, y::Any, points::Any, outer_radius::Any, inner_radius::Any, 
