@@ -1,7 +1,7 @@
 name = "ToolipsSVG"
 uuid = "8ae86ec9-919d-4ece-9a6d-09b7d28dae11"
 authors = ["emmac <emmettgb@gmail.com>"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 ToolipsServables = "bf3a9e68-ca66-4981-8178-9d71c4f8abaa"
@@ -14,4 +14,4 @@ test = ["Test"]
 
 [compat]
 julia = "1.0"
-ToolipsServables = "0.1.2"
+ToolipsServables = "0.2"
