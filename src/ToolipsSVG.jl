@@ -301,7 +301,7 @@ abstract type SVGShape{T <: Any} end
 """
 ```julia
 get_shape(comp::Component{<:Any}) -> ::SVGShape{<:Any}
----
+```
 Retrieves the `SVGShape` of `comp`, which is simply the component's 
 type parameter. `SVGShape` is used to provide conversions with `set_shape`.
 ```example
@@ -325,7 +325,7 @@ get_shape(comp::Component{<:Any}) = SVGShape{typeof(comp).parameters[1]}
 """
 ```julia
 set_shape(comp::Component{<:Any}, into::Symbol; args ...)
----
+```
 `set_shape` is used to turn a shape into another shape with the same 
 size and position.
 
@@ -375,7 +375,7 @@ end
 
 function set_shape(shape::Component{<:Any}, into::Type{SVGShape{:rect}}; args ...)
     s = get_position(shape)
-    dims = size(comp)
+    dims = size(shape)
     rct::Component{:rect} = rect(shape.name)::Component{:rect}
     rct.properties = shape.properties
     push!(rct.properties, :x => s[1], :y => s[2], :width => dims[1], :height => dims[2])
