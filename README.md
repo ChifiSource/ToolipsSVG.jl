@@ -2,6 +2,12 @@
 <img src = "https://github.com/ChifiSource/image_dump/blob/main/toolips/toolipsSVG.png"></img>
 </br>
 </br>
+  
+[![version](https://juliahub.com/docs/General/ToolipsSVG/stable/version.svg)](https://juliahub.com/ui/Packages/General/ToolipsSVG)
+
+[docs](https://chifidocs.com/toolips/ToolipsSVG) 
+
+
 </div>
 
 ToolipsSVG provides SVG components, a `Component{:path}` mutation interface, a multiple dispatch interface for managing and setting size, shape, and positions of different components, and SVG shapes for [Toolips](https://github.com/ChifiSource/Toolips.jl) and [Gattino](https://github.com/ChifiSource/Gattino.jl) powered by [ToolipsServables](https://github.com/ChifiSource/ToolipsServables.jl).
